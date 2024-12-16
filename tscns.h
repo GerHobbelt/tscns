@@ -66,6 +66,10 @@ public:
     return __rdtsc();
 #elif defined(__i386__) || defined(__x86_64__) || defined(__amd64__)
     return __builtin_ia32_rdtsc();
+#elif defined(__aarch64__)
+    uint64_t cntvct_el0;
+    asm volatile("mrs %0, cntvct_el0" : "=r" (cntvct_el0));
+    return cntvct_el0;
 #else
     return rdsysns();
 #endif
@@ -143,7 +147,7 @@ public:
     param_seq_.store(++seq, std::memory_order_release);
   }
 
-  alignas(64) std::atomic<uint32_t> param_seq_ = 0;
+  alignas(64) std::atomic<uint32_t> param_seq_{0};
   double ns_per_tsc_;
   int64_t base_tsc_;
   int64_t base_ns_;
