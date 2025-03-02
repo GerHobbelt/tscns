@@ -29,7 +29,7 @@ SOFTWARE.
 
 using namespace std;
 
-TSCNS tn;
+TSCNS<> tn;
 
 string ptime(int64_t ts) {
   if (ts == 0) return "null";
@@ -38,7 +38,7 @@ string ptime(int64_t ts) {
   time_t sec = ts / 1000000000;
   int ns = ts % 1000000000;
   dt = localtime(&sec);
-  strftime(ret.data(), 18, "%H:%M:%S.", dt);
+  strftime(const_cast<char *>(ret.data()), 18, "%H:%M:%S.", dt);
   for (int i = 17; i >= 9; i--) {
     ret[i] = '0' + (ns % 10);
     ns /= 10;
