@@ -26,9 +26,30 @@ SOFTWARE.
 #include <chrono>
 #include <atomic>
 #include <thread>
+#include <array>
 
 #ifdef _MSC_VER
 #include <intrin.h>
+#endif
+
+#ifdef _MSC_VER
+
+#define TSCNS_FORCE_INLINE __forceinline
+
+#else //  _MSC_VER
+
+#if (defined(__GNUC__) && (__GNUC__ >= 4)) \
+    || (defined(__clang__) && (__clang_major__ >= 4)) \
+    || defined(__INTEL_COMPILER) \
+    || defined(__xlC__)
+
+#define TSCNS_FORCE_INLINE   __attribute__((always_inline)) inline
+
+#else
+
+#define TSCNS_FORCE_INLINE
+
+#endif
 #endif
 
 namespace tscns {
@@ -124,7 +145,7 @@ void TSCNS<kCachelineSize>::calibrate()
 }
 
 template <int32_t kCachelineSize>
-int64_t __attribute__((always_inline)) TSCNS<kCachelineSize>::rdtsc()
+int64_t TSCNS_FORCE_INLINE TSCNS<kCachelineSize>::rdtsc()
 {
 #ifdef _MSC_VER
     return __rdtsc();
@@ -140,7 +161,7 @@ int64_t __attribute__((always_inline)) TSCNS<kCachelineSize>::rdtsc()
 }
 
 template <int32_t kCachelineSize>
-int64_t __attribute__((always_inline)) TSCNS<kCachelineSize>::tsc2ns(int64_t tsc) const
+int64_t TSCNS_FORCE_INLINE TSCNS<kCachelineSize>::tsc2ns(int64_t tsc) const
 {
     int64_t ns;
     uint32_t before_seq, after_seq;
@@ -148,7 +169,7 @@ int64_t __attribute__((always_inline)) TSCNS<kCachelineSize>::tsc2ns(int64_t tsc
     {
         before_seq = param_seq_.load(std::memory_order_acquire) & ~1;
         std::atomic_signal_fence(std::memory_order_acq_rel);
-        int64_t ns = base_ns_ + static_cast<int64_t>((tsc - base_tsc_) * ns_per_tsc_);
+        ns = base_ns_ + static_cast<int64_t>((tsc - base_tsc_) * ns_per_tsc_);
         std::atomic_signal_fence(std::memory_order_acq_rel);
         after_seq = param_seq_.load(std::memory_order_acquire);
     } while(before_seq != after_seq);
@@ -167,19 +188,19 @@ return ns;
 */
 
 template <int32_t kCachelineSize>
-int64_t __attribute__((always_inline)) TSCNS<kCachelineSize>::rdns() const
+int64_t TSCNS_FORCE_INLINE TSCNS<kCachelineSize>::rdns() const
 {
     return tsc2ns(rdtsc());
 }
 
 template <int32_t kCachelineSize>
-int64_t __attribute__((always_inline)) TSCNS<kCachelineSize>::rdsysns()
+int64_t TSCNS_FORCE_INLINE TSCNS<kCachelineSize>::rdsysns()
 {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 template <int32_t kCachelineSize>
-double __attribute__((always_inline)) TSCNS<kCachelineSize>::getTscGhz() const
+double TSCNS_FORCE_INLINE TSCNS<kCachelineSize>::getTscGhz() const
 {
     return 1.0 / ns_per_tsc_;
 }
