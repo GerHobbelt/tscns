@@ -25,7 +25,7 @@ SOFTWARE.
 #include <iomanip>
 #include <chrono>
 #include <thread>
-#include "tscns.h"
+#include "tscns.hpp"
 
 #include "monolithic_examples.h"
 

@@ -26,7 +26,7 @@ SOFTWARE.
 #include <chrono>
 #include <thread>
 #include <immintrin.h>
-#include "tscns.h"
+#include "tscns.hpp"
 
 #include "monolithic_examples.h"
 
