@@ -27,11 +27,13 @@ SOFTWARE.
 #include <thread>
 #include "tscns.h"
 
+#include "monolithic_examples.h"
+
 using namespace std;
 
-TSCNS<> tn;
+static tscns::TSCNS<> tn;
 
-string ptime(int64_t ts) {
+static string ptime(int64_t ts) {
   if (ts == 0) return "null";
   struct tm* dt;
   string ret(18, '0');
@@ -46,7 +48,12 @@ string ptime(int64_t ts) {
   return ret;
 }
 
-int main(int argc, char** argv) {
+#if defined(BUILD_MONOLITHIC)
+#define main  tscns_test_main
+#endif
+
+extern "C"
+int main(int argc, const char** argv) {
   tn.init();
   cout << std::setprecision(15) << "init tsc_ghz: " << tn.getTscGhz() << endl;
 

@@ -28,21 +28,29 @@ SOFTWARE.
 #include <immintrin.h>
 #include "tscns.h"
 
+#include "monolithic_examples.h"
+
 using namespace std;
 
-TSCNS tn;
+static tscns::TSCNS tn;
 
-int main(int argc, char** argv) {
+#if defined(BUILD_MONOLITHIC)
+#define main  tscns_alt_test_main
+#endif
+
+extern "C"
+int main(int argc, const char** argv) {
   double tsc_ghz;
   if (argc > 1) {
     tsc_ghz = stod(argv[1]);
     tn.init(tsc_ghz);
   }
   else {
-    tsc_ghz = tn.init();
+    tn.init();
     // it'll be more precise if you wait a while and calibrate
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    tsc_ghz = tn.calibrate();
+    tn.calibrate();
+	tsc_ghz = tn.getTscGhz();
   }
 
   cout << std::setprecision(17) << "tsc_ghz: " << tsc_ghz << endl;
@@ -54,7 +62,6 @@ int main(int argc, char** argv) {
   // 2) Try running test with the same tsc_ghz at different times, see if the offsets are similar(not necessary the
   // same). If you find them steadily go up/down at a fast speed, then your tsc_ghz is not precise enough, try
   // calibrating with a longer waiting time and test again.
-  cout << "offset: " << tn.rdoffset() << endl;
 
   int64_t rdns_latency;
   {
