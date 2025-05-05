@@ -124,7 +124,17 @@ void TSCNS<kCachelineSize>::calibrate()
 template <int32_t kCachelineSize>
 int64_t __attribute__((always_inline)) TSCNS<kCachelineSize>::rdtsc()
 {
+#ifdef _MSC_VER
+    return __rdtsc();
+#elif defined(__i386__) || defined(__x86_64__) || defined(__amd64__)
     return __builtin_ia32_rdtsc();
+#elif defined(__aarch64__)
+    uint64_t cntvct_el0;
+    asm volatile("mrs %0, cntvct_el0" : "=r" (cntvct_el0));
+    return cntvct_el0;
+#else
+    return rdsysns();
+#endif
 }
 
 template <int32_t kCachelineSize>
