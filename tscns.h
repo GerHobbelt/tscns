@@ -31,6 +31,8 @@ SOFTWARE.
 #include <intrin.h>
 #endif
 
+namespace tscns {
+
 /**
  * @brief A thread safe clock library to get the current timestamp at nanosecond precision and nanosecond latency.
  * It uses tsc register to get the timestamp counter. However, the value of tsc has to do with CPU frequency,
@@ -228,4 +230,6 @@ void TSCNS<kCachelineSize>::saveParam(int64_t base_tsc, int64_t sys_ns, int64_t 
     // Use memory fence here, protecting the stores of normal variables, while still allowing these normal
     // stores to be reordered with each other for better performance.
     param_seq_.store(++seq, std::memory_order_release);
+}
+
 }
